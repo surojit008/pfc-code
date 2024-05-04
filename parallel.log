@@ -1,0 +1,114 @@
+**********************************************
+* Logging started at Thu May 2 20:24:47 2024
+* By pfc2d Version 6.00 Release 013
+* 
+* 
+* Job Title: Testing Bonded Particle Model
+**********************************************
+pfc2d>
+pfc2d>
+pfc2d>program call 'ucsf'
+pfc2d>; fname: ucs.p2dat
+pfc2d>;
+pfc2d>; Perform an unconfined compressive strength test on a bonded sample
+pfc2d>;==============================================================================
+pfc2d>
+pfc2d>program echo off
+pfc2d>
+pfc2d>; Model setup (optional, replace with "model restore 'your_model_name'" if you have an existing model)
+pfc2d>; set up global parameters for stress and strain measurement
+pfc2d>@setup_wall
+pfc2d>
+pfc2d>; Create the fracture using the smooth joint model
+pfc2d>
+pfc2d>
+pfc2d>; Assign contact and other properties to the fracture
+pfc2d>
+pfc2d>; apply loading by moving top and bottom walls
+pfc2d>wall attribute velocity-y -0.1 range id 1
+--- Y-Velocity initialized in 1 walls.
+pfc2d>wall attribute velocity-y 0.1 range id 2
+--- Y-Velocity initialized in 1 walls.
+pfc2d>
+pfc2d>; apply a small amount of damping
+pfc2d>ball attribute damp 0.1
+--- Attribute damp initialized in 2988 ball(s).
+pfc2d>
+pfc2d>; record histories
+pfc2d>fish history name 1 @axial_stress_wall
+--- Created history 1
+pfc2d>fish history name 2 @axial_strain_wall
+--- Created history 2
+pfc2d>
+pfc2d>; record cracks
+pfc2d>@track_init
+pfc2d>fracture delete
++++ No fractures found in range.
+pfc2d>fragment clear
+--- The previous fragment computations have been cleared and automatic updates disabled.
+pfc2d>fragment register ball-ball
+--- 6791 contacts of type ball-ball have been registered.
+pfc2d>fish callback remove @add_crack
+pfc2d>fish callback add @add_crack event bond_break
+--- Function add_crack registered as a callback with event bond_break
+pfc2d>fish history name 3 @crack_num
+--- Created history 3
+pfc2d>; Create a fracture
+pfc2d>; Create a fracture
+pfc2d>fracture create position 0.0 0.0 dip 10.0 size 0.04
+--- The dfn dfn1 with ID 1 has been created.
+--- The fracture with ID 1 has been added to the dfn dfn1 with ID 1.
+pfc2d>; Set the properties of the fracture to the smooth joint model
+pfc2d>fracture pro 'cohesion' 12e6 'friction' 0.0 'kn' 4000e9 'ks' 500e9 
+--- Property cohesion assigned to 1 fractures in range.
+--- Property friction assigned to 1 fractures in range.
+--- Property kn assigned to 1 fractures in range.
+--- Property ks assigned to 1 fractures in range.
+pfc2d>fracture contact-model model 'smoothjoint' install
+--- The contact model smoothjoint has been applied to 56 contacts.
+pfc2d>; run some steps to get past initial vibrations
+pfc2d>
+pfc2d>model cycle 1000
+    Cycle      Total    Timestep       Clock
+--------- ---------- ----------- ----------- 
+     1000       9674 8.93951E-08 00:00:00:02      1000                                    
+--- Global cycle limit of 1000 met.
+--- Cycling ended at: 2024-05-02 20:24:50
+pfc2d>
+pfc2d>; run the test until stress falls below 70% of the peak
+pfc2d>fish set peak_fraction = 0.7
+pfc2d>
+pfc2d>
+pfc2d>; Set the contact material model
+pfc2d>
+pfc2d>model solve fish-halt @loadhalt_wall
+pfc2d>fragment compute
+--- 1 fragment(s) have been found.
+--- Fragment IDs have been assigned.
+pfc2d>fragment compute
+--- 1 fragment(s) have been found.
+--- Fragment IDs have been assigned.
+pfc2d>fragment compute
+--- 5 fragment(s) have been found.
+--- Fragment IDs have been assigned.
+--- Global FishHalt function loadhalt_wall.
+    Cycle      Total    Timestep       Clock
+--------- ---------- ----------- ----------- 
+     3774      13448 8.93943E-08 00:00:00:10                                              
+--- FISH function loadhalt_wall returned 1.
+--- Cycling ended at: 2024-05-02 20:25:01
+pfc2d>fish list @peak_stress
+peak_stress = 4.725623310782716e+06 (real)
+pfc2d>
+pfc2d>;==============================================================================
+pfc2d>; eof: ucs.p2dat
+pfc2d>model save 'parallel_ucs2'
+--- Model saved to file D:/Surojit Final Work/project files/10 degree/parallel_ucs2.sav.
+pfc2d>
+pfc2d>; run tension test
+pfc2d>
+pfc2d>
+pfc2d>program log off
+**********************************************
+* Logging ended at Thu May 2 20:25:01 2024
+**********************************************

@@ -1,0 +1,26 @@
+; fname: doall_parallel.p2dat
+;
+;  Create and test parallel bonded material
+;==============================================================================
+
+; make the unbonded sample
+program call 'make_samplef' suppress
+
+; bond it
+program call 'parallel_bondedf'suppress
+
+
+program log-file 'parallel.log'
+program log on
+
+
+program call 'ucsf'
+model save 'parallel_ucs2'
+
+; run tension test
+
+
+program log off
+
+;==============================================================================
+; eof: doall_parallel.p2dat
